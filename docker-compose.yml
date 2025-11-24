@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  dotnet-hello-msg:
+    image: ghcr.io/olive-techno/dotnet-env-injector:main
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:         
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.12'
+          memory: 128M
+          
+    networks:
+      - proxy-net
+    ports:
+      - target: 8080
+        published: 8128
+        protocol: tcp
+        mode: ingress
+    environment:
+      - GREETING_TEXT=Hi rabbit!
+      - ASPNETCORE_URLS=http://+:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  proxy-net:
+    external: true
